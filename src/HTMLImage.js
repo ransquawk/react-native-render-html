@@ -1,6 +1,12 @@
 import React, { PureComponent } from 'react';
 import { Image, View, Text } from 'react-native';
 import PropTypes from 'prop-types';
+import { Dimensions } from 'react-native';
+const { width, height } = Dimensions.get('window');
+
+const guidelineBaseWidth = 350;
+const guidelineBaseHeight = 680;
+
 
 export default class HTMLImage extends PureComponent {
     constructor (props) {
@@ -49,24 +55,14 @@ export default class HTMLImage extends PureComponent {
         if (width) {
             styleWidth = width;
         }
-        if (Array.isArray(style)) {
-            style.forEach((styles) => {
-                if (!width && styles['width']) {
-                    styleWidth = styles['width'];
-                }
-                if (!height && styles['height']) {
-                    styleHeight = styles['height'];
-                }
-            });
-        } else {
-            if (!width && style['width']) {
-                styleWidth = style['width'];
+        style.forEach((styles) => {
+            if (!width && styles['width']) {
+                styleWidth = styles['width'];
             }
-            if (!height && style['height']) {
-                styleHeight = style['height'];
+            if (!height && styles['height']) {
+                styleHeight = styles['height'];
             }
-        }
-
+        });
         return { styleWidth, styleHeight };
     }
 
@@ -101,7 +97,8 @@ export default class HTMLImage extends PureComponent {
         return (
             <Image
               source={source}
-              style={[style, { width: this.state.width, height: this.state.height, resizeMode: 'cover' }]}
+              resizeMethod='resize'
+              style={[style, { width: this.moderateScale(250), height: this.moderateScale(250), resizeMode: 'contain' }]} 
               {...props}
             />
         );
@@ -120,4 +117,11 @@ export default class HTMLImage extends PureComponent {
 
         return !this.state.error ? this.validImage(source, style, passProps) : this.errorImage;
     }
+
+
+//Guideline sizes are based on standard ~5" screen mobile device
+
+scale = size => width / guidelineBaseWidth * size;
+verticalScale = size => height / guidelineBaseHeight * size;
+moderateScale = (size, factor = 0.5) => size + ( this.scale(size) - size ) * factor;
 }

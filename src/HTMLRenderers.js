@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, View, WebView, Dimensions } from 'react-native';
-import { _constructStyles, _getElementClassStyles } from './HTMLStyles';
+import { _constructStyles } from './HTMLStyles';
 import HTMLImage from './HTMLImage';
 
 export function a (htmlAttribs, children, convertedCSSStyles, passProps) {
@@ -44,9 +44,10 @@ export function img (htmlAttribs, children, convertedCSSStyles, passProps = {}) 
         styleSet: 'IMAGE'
     });
     const { src, alt, width, height } = htmlAttribs;
+    const ranSrc = 'https://ransquawk.com';
     return (
         <HTMLImage
-          source={{ uri: src }}
+          source={{ uri: `${ranSrc}${src}` }}
           alt={alt}
           width={width}
           height={height}
@@ -116,27 +117,24 @@ export function iframe (htmlAttribs, children, convertedCSSStyles, passProps) {
     if (!htmlAttribs.src) {
         return false;
     }
-    const { staticContentMaxWidth, tagsStyles, classesStyles } = passProps;
-
-    const tagStyleHeight = tagsStyles.iframe && tagsStyles.iframe.height;
-    const tagStyleWidth = tagsStyles.iframe && tagsStyles.iframe.width;
-
-    const classStyles = _getElementClassStyles(htmlAttribs, classesStyles);
-    const classStyleWidth = classStyles.width;
-    const classStyleHeight = classStyles.height;
-
-    const attrHeight = htmlAttribs.height ? parseInt(htmlAttribs.height) : false;
-    const attrWidth = htmlAttribs.width ? parseInt(htmlAttribs.width) : false;
-
-    const height = attrHeight || classStyleHeight || tagStyleHeight || 200;
-    const width = attrWidth || classStyleWidth || tagStyleWidth || staticContentMaxWidth;
-
+    const { staticContentMaxWidth } = passProps;
     const style = _constructStyles({
         tagName: 'iframe',
         htmlAttribs,
         passProps,
         styleSet: 'VIEW',
-        additionalStyles: [{ height, width }]
+        additionalStyles: [
+            {
+                height: htmlAttribs.height ?
+                    parseInt(htmlAttribs.height, 10) :
+                    undefined
+            },
+            {
+                width: staticContentMaxWidth && htmlAttribs.width && htmlAttribs.width <= staticContentMaxWidth ?
+                    parseInt(htmlAttribs.width, 10) :
+                    staticContentMaxWidth
+            }
+        ]
     });
 
     return (
